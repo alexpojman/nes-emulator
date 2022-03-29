@@ -102,14 +102,23 @@ impl CPU {
             let opcode = opcodes.get(&current_code).expect(&format!("OpCode {:x} is not recognized", current_code));
 
             match current_code {
+                /* LDA */
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => {
                     self.lda(&opcode.mode);
-                },
+                }
+                /* STA */
                 0x85 | 0x95 | 0x8D | 0x9D | 0x99 | 0x81 | 0x91 => {
                     self.sta(&opcode.mode);
                 }
+                /* ORA */
+                0x09 | 0x05 | 0x15 | 0x0D | 0x1D | 0x19 | 0x01 | 0x11 => {
+                    self.ora(&opcode.mode);
+                }
+                /* TAX */
                 0xAA => self.tax(),
+                /* INX */
                 0xE8 => self.inx(),
+                /* BRK */
                 0x00 => return,
                 _ => todo!("")
             }
@@ -120,12 +129,16 @@ impl CPU {
         }
     }
 
+    fn set_register_a(&mut self, value: u8) {
+        self.register_a = value;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
     fn lda(&mut self, mode: &AddressingMode) {
         let addr = self.get_operand_address(mode);
         let value = self.mem_read(addr);
 
-        self.register_a = value;
-        self.update_zero_and_negative_flags(self.register_a);
+        self.set_register_a(value);
     }
 
     fn tax(&mut self) {
@@ -141,6 +154,12 @@ impl CPU {
     fn sta(&mut self, mode: &AddressingMode) {
         let addr = self.get_operand_address(mode);
         self.mem_write(addr, self.register_a);
+    }
+
+    fn ora(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let data = self.mem_read(addr);
+        self.set_register_a(data | self.register_a);
     }
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
