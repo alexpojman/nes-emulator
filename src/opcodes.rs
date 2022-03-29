@@ -280,7 +280,7 @@ lazy_static! {
         // TXA - Transfer Index X to Accumulator
         OpCode::new(0x8A, "TXA", 1, 2, AddressingMode::NoneAddressing),
 
-        // TXS - Transfer Index X to Stack Register
+        // TXS - Transfer Index X to Stack Pointer
         OpCode::new(0x9A, "TXS", 1, 2, AddressingMode::NoneAddressing),
 
         // TYA - Transfer Index Y to Accumulator
