@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::opcodes;
+use std::collections::HashMap;
 
 bitflags! {
     /// # Status Register (P) http://wiki.nesdev.com/w/index.php/Status_flags
@@ -36,12 +36,12 @@ pub struct CPU {
     pub status: CpuFlags,
     pub program_counter: u16,
     pub stack_pointer: u8,
-    memory: [u8; 0xFFFF]
+    memory: [u8; 0xFFFF],
 }
 
 trait Mem {
     fn mem_read(&self, addr: u16) -> u8;
-    
+
     fn mem_write(&mut self, addr: u16, data: u8);
 
     fn mem_read_u16(&self, pos: u16) -> u16 {
@@ -62,7 +62,7 @@ impl Mem for CPU {
     fn mem_read(&self, addr: u16) -> u8 {
         self.memory[addr as usize]
     }
-    
+
     fn mem_write(&mut self, addr: u16, data: u8) {
         self.memory[addr as usize] = data;
     }
@@ -92,7 +92,7 @@ impl CPU {
             status: CpuFlags::from_bits_truncate(0b100100),
             program_counter: 0,
             stack_pointer: 0,
-            memory: [0; 0xFFFF]
+            memory: [0; 0xFFFF],
         }
     }
 
@@ -105,9 +105,9 @@ impl CPU {
         let mut carry_flag: u16 = 0;
 
         if self.status.contains(CpuFlags::CARRY) {
-                carry_flag = 1;
+            carry_flag = 1;
         }
-    
+
         let sum = self.register_a as u16 + data as u16 + carry_flag;
 
         let carry = sum > 0xff;
@@ -164,7 +164,7 @@ impl CPU {
     }
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
-        if  result == 0 {
+        if result == 0 {
             self.status.insert(CpuFlags::ZERO);
         } else {
             self.status.remove(CpuFlags::ZERO);
@@ -186,22 +186,22 @@ impl CPU {
                 let pos = self.mem_read(self.program_counter);
                 let addr = pos.wrapping_add(self.register_x) as u16;
                 addr
-            },
+            }
             AddressingMode::ZeroPage_Y => {
                 let pos = self.mem_read(self.program_counter);
                 let addr = pos.wrapping_add(self.register_y) as u16;
                 addr
-            },
+            }
             AddressingMode::Absolute_X => {
                 let pos = self.mem_read_u16(self.program_counter);
                 let addr = pos.wrapping_add(self.register_x as u16);
                 addr
-            },
+            }
             AddressingMode::Absolute_Y => {
                 let pos = self.mem_read_u16(self.program_counter);
                 let addr = pos.wrapping_add(self.register_y as u16);
                 addr
-            },
+            }
             AddressingMode::Indirect_X => {
                 let base = self.mem_read(self.program_counter);
 
@@ -209,7 +209,7 @@ impl CPU {
                 let lo = self.mem_read(ptr as u16);
                 let hi = self.mem_read(ptr.wrapping_add(1) as u16);
                 (hi as u16) << 8 | (lo as u16)
-            },
+            }
             AddressingMode::Indirect_Y => {
                 let base = self.mem_read(self.program_counter);
 
@@ -218,15 +218,15 @@ impl CPU {
                 let deref_base = (hi as u16) << 8 | (lo as u16);
                 let deref = deref_base.wrapping_add(self.register_y as u16);
                 deref
-            },
+            }
             AddressingMode::NoneAddressing => {
                 panic!("mode {:?} is not supported", mode);
-            },
+            }
         }
     }
 
     /*
-        NES platform has a special mechanism to mark where the CPU should start the execution. 
+        NES platform has a special mechanism to mark where the CPU should start the execution.
         Upon inserting a new cartridge, the CPU receives a special signal called "Reset interrupt" that instructs CPU to:
         1. reset the state (registers and flags)
         2. set program_counter to the 16-bit address that is stored at 0xFFFC
@@ -242,7 +242,7 @@ impl CPU {
     }
 
     pub fn load(&mut self, program: Vec<u8>) {
-        self.memory[0x8000 .. (0x8000 + program.len())].copy_from_slice(&program[..]); //[0x8000 .. 0xFFFF] is reserved for program ROM
+        self.memory[0x8000..(0x8000 + program.len())].copy_from_slice(&program[..]); //[0x8000 .. 0xFFFF] is reserved for program ROM
         self.mem_write_u16(0xFFFC, 0x8000);
     }
 
@@ -260,7 +260,9 @@ impl CPU {
             self.program_counter += 1;
             let program_counter_state = self.program_counter;
 
-            let opcode = opcodes.get(&current_code).expect(&format!("OpCode {:x} is not recognized", current_code));
+            let opcode = opcodes
+                .get(&current_code)
+                .expect(&format!("OpCode {:x} is not recognized", current_code));
 
             match current_code {
                 /* ADC */
@@ -339,7 +341,7 @@ impl CPU {
                 0x9A => self.txs(),
                 /* TYA */
                 0x98 => self.tya(),
-                _ => todo!("")
+                _ => todo!(""),
             }
 
             if program_counter_state == self.program_counter {
@@ -512,7 +514,7 @@ impl CPU {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
     }
-    
+
     fn tay(&mut self) {
         self.register_y = self.register_a;
         self.update_zero_and_negative_flags(self.register_y);
@@ -563,7 +565,7 @@ mod test {
     #[test]
     fn test_0xaa_tax_move_a_to_x() {
         let mut cpu = CPU::new();
-        cpu.load_and_run(vec![0xa9, 0x0a,0xaa, 0x00]);
+        cpu.load_and_run(vec![0xa9, 0x0a, 0xaa, 0x00]);
 
         assert_eq!(cpu.register_x, 10);
     }
@@ -572,44 +574,44 @@ mod test {
     fn test_5_ops_working_together() {
         let mut cpu = CPU::new();
         cpu.load_and_run(vec![0xa9, 0xc0, 0xaa, 0xe8, 0x00]);
-  
+
         assert_eq!(cpu.register_x, 0xc1)
     }
- 
-     #[test]
-     fn test_inx_overflow() {
-         let mut cpu = CPU::new();
-         cpu.load_and_run(vec![0xa9, 0xff, 0xaa, 0xe8, 0xe8, 0x00]);
- 
-         assert_eq!(cpu.register_x, 1)
-     }
 
-     #[test]
-     fn test_lda_from_memory() {
-         let mut cpu = CPU::new();
-         cpu.mem_write(0x10, 0x55);
+    #[test]
+    fn test_inx_overflow() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0xff, 0xaa, 0xe8, 0xe8, 0x00]);
 
-         cpu.load_and_run(vec![0xa5, 0x10, 0x00]);
+        assert_eq!(cpu.register_x, 1)
+    }
 
-         assert_eq!(cpu.register_a, 0x55);
-     }
+    #[test]
+    fn test_lda_from_memory() {
+        let mut cpu = CPU::new();
+        cpu.mem_write(0x10, 0x55);
 
-     #[test]
-     fn test_nop() {
-         let mut cpu = CPU::new();
-         cpu.mem_write(0x10, 0x55);
+        cpu.load_and_run(vec![0xa5, 0x10, 0x00]);
 
-         cpu.load_and_run(vec![0xEA, 0x00]);
+        assert_eq!(cpu.register_a, 0x55);
+    }
 
-         assert_eq!(cpu.register_a, 0x00);
-     }
+    #[test]
+    fn test_nop() {
+        let mut cpu = CPU::new();
+        cpu.mem_write(0x10, 0x55);
 
-     #[test]
-     fn test_tye() {
+        cpu.load_and_run(vec![0xEA, 0x00]);
+
+        assert_eq!(cpu.register_a, 0x00);
+    }
+
+    #[test]
+    fn test_tye() {
         let mut cpu = CPU::new();
         cpu.mem_write(0x10, 0x55);
         cpu.load_and_run(vec![0xa5, 0x10, 0x98, 0x00]);
 
         assert_eq!(cpu.register_a, cpu.register_y)
-     }
+    }
 }

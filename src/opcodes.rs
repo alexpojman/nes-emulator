@@ -6,7 +6,7 @@ pub struct OpCode {
     pub mnemonic: &'static str,
     pub len: u8,
     pub cycles: u8,
-    pub mode: AddressingMode
+    pub mode: AddressingMode,
 }
 
 impl OpCode {
@@ -16,7 +16,7 @@ impl OpCode {
             mnemonic: mnemonic,
             len: len,
             cycles: cycles,
-            mode: mode
+            mode: mode,
         }
     }
 }
@@ -42,7 +42,7 @@ lazy_static! {
         OpCode::new(0x39, "AND", 3, 4 /* +1 */, AddressingMode::Absolute_Y),
         OpCode::new(0x21, "AND", 2, 6, AddressingMode::Indirect_X),
         OpCode::new(0x31, "AND", 2, 5 /* +1 */, AddressingMode::Indirect_Y),
-        
+
         // ASL - Shift Left One Bit (Memory or Accumulator)
         OpCode::new(0x0A, "ASL", 1, 2, AddressingMode::NoneAddressing),
         OpCode::new(0x06, "ASL", 2, 5, AddressingMode::ZeroPage),
@@ -143,7 +143,7 @@ lazy_static! {
 
         // INX - Increment Index X by One
         OpCode::new(0xE8, "INX", 1, 2, AddressingMode::NoneAddressing),
-        
+
         // INY - Increment Index Y by One
         OpCode::new(0xC8, "INY", 1, 2, AddressingMode::NoneAddressing),
 
@@ -200,7 +200,7 @@ lazy_static! {
 
         // PHA - Push Accumulator on Stack
         OpCode::new(0x48, "PHA", 1, 3, AddressingMode::NoneAddressing),
-        
+
         // PHP - Push Processor Status on Stack
         OpCode::new(0x08, "PHP", 1, 3, AddressingMode::NoneAddressing),
 
@@ -270,10 +270,10 @@ lazy_static! {
 
         // TAX - Transfer Accumulator to Index X
         OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::NoneAddressing),
-        
+
         // TAY - Transfer Accumulator to Index Y
         OpCode::new(0xA8, "TAY", 1, 2, AddressingMode::NoneAddressing),
-        
+
         // TSX - Transfer Stack Pointer to Index X
         OpCode::new(0xBA, "TSX", 1, 2, AddressingMode::NoneAddressing),
 
