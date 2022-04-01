@@ -277,22 +277,106 @@ impl CPU {
                 0x0A | 0x06 | 0x16 | 0x0E | 0x1E => {
                     self.asl(&opcode.mode);
                 }
+                /* BCC */
+                0x90 => todo!(),
+                /* BCS */
+                0xB0 => todo!(),
+                /* BEQ */
+                0xF0 => todo!(),
+                /* BIT */
+                0x24 | 0x2C => {
+                    todo!()
+                }
+                /* BMI */
+                0x30 => todo!(),
+                /* BNE */
+                0xD0 => todo!(),
+                /* BPL */
+                0x10 => todo!(),
                 /* BRK */
                 0x00 => return,
+                /* BVC */
+                0x50 => todo!(),
+                /* BVS */
+                0x70 => todo!(),
+                /* CLC */
+                0x18 => todo!(),
+                /* CLD */
+                0xD8 => todo!(),
+                /* CLI */
+                0x58 => todo!(),
+                /* CLV */
+                0xB8 => todo!(),
+                /* CMP */
+                0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => {
+                    todo!()
+                }
+                /* CPX */
+                0xE0 | 0xE4 | 0xEC => {
+                    todo!()
+                }
+                /* CPY */
+                0xC0 | 0xC4 | 0xCC => {
+                    todo!()
+                }
+                /* DEC */
+                0xC6 | 0xD6 | 0xCE | 0xDE => {
+                    todo!()
+                }
+                /* DEX */
+                0xCA => todo!(),
+                /* DEY */
+                0x88 => todo!(),
+                /* EOR */
+                0x49 | 0x45 | 0x55 | 0x4D | 0x5D | 0x59 | 0x41 | 0x51 => {
+                    todo!()
+                }
+                /* INC */
+                0xE6 | 0xF6 | 0xEE | 0xFE => {
+                    todo!()
+                }
                 /* INX */
                 0xE8 => self.inx(),
+                /* INY */
+                0xC8 => todo!(),
+                /* JMP */
+                0x4C | 0x6C => {
+                    todo!()
+                }
+                /* JSR */
+                0x20 => todo!(),
                 /* LDA */
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => {
                     self.lda(&opcode.mode);
                 }
-                /* ORA */
-                0x09 | 0x05 | 0x15 | 0x0D | 0x1D | 0x19 | 0x01 | 0x11 => {
-                    self.ora(&opcode.mode);
+                /* LDX */
+                0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => {
+                    todo!()
+                }
+                /* LDY */
+                0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => {
+                    todo!()
+                }
+                /* LSR */
+                0x4A | 0x46 | 0x56 | 0x4E | 0x5E => {
+                    todo!()
                 }
                 /* NOP */
                 0xEA => {
                     // do nothing
                 }
+                /* ORA */
+                0x09 | 0x05 | 0x15 | 0x0D | 0x1D | 0x19 | 0x01 | 0x11 => {
+                    self.ora(&opcode.mode);
+                }
+                /* PHA */
+                0x48 => self.pha(),
+                /* PHP */
+                0x08 => self.php(),
+                /* PLA */
+                0x68 => self.pla(),
+                /* PLP */
+                0x28 => self.plp(),
                 /* ROL */
                 0x2A => self.rol_accumulator(),
                 0x26 | 0x36 | 0x2E | 0x3E => {
@@ -393,6 +477,29 @@ impl CPU {
         let addr = self.get_operand_address(mode);
         let data = self.mem_read(addr);
         self.set_register_a(data | self.register_a);
+    }
+
+    fn pha(&mut self) {
+        self.stack_push(self.register_a);
+    }
+
+    fn php(&mut self) {
+        //http://wiki.nesdev.com/w/index.php/CPU_status_flag_behavior
+        let mut flags = self.status.clone();
+        flags.insert(CpuFlags::BREAK);
+        flags.insert(CpuFlags::BREAK2);
+        self.stack_push(flags.bits());
+    }
+
+    fn pla(&mut self) {
+        let data = self.stack_pop();
+        self.set_register_a(data);
+    }
+
+    fn plp(&mut self) {
+        self.status.bits = self.stack_pop();
+        self.status.remove(CpuFlags::BREAK);
+        self.status.insert(CpuFlags::BREAK2);
     }
 
     fn rol(&mut self, mode: &AddressingMode) -> u8 {
