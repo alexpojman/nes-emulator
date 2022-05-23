@@ -27,7 +27,7 @@ pub struct Bus {
 }
 
 impl Bus {
-    pub fn new()->Self {
+    pub fn new() -> Self {
         Bus { cpu_vram: [0; 2048] }
     }
 }

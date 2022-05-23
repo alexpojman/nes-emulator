@@ -1,5 +1,8 @@
-use crate::{opcodes, bus::{Bus, Mem}};
-use std::{collections::HashMap};
+use crate::{
+    bus::{Bus, Mem},
+    opcodes,
+};
+use std::collections::HashMap;
 
 bitflags! {
     /// # Status Register (P) http://wiki.nesdev.com/w/index.php/Status_flags
@@ -36,7 +39,7 @@ pub struct CPU {
     pub status: CpuFlags,
     pub program_counter: u16,
     pub stack_pointer: u8,
-    bus: Bus
+    bus: Bus,
 }
 
 impl Mem for CPU {
@@ -50,7 +53,7 @@ impl Mem for CPU {
     fn mem_read_u16(&self, pos: u16) -> u16 {
         self.bus.mem_read_u16(pos)
     }
-  
+
     fn mem_write_u16(&mut self, pos: u16, data: u16) {
         self.bus.mem_write_u16(pos, data)
     }
@@ -79,7 +82,7 @@ impl CPU {
             register_y: 0,
             status: CpuFlags::from_bits_truncate(0b100100),
             program_counter: 0,
-            stack_pointer: 0,
+            stack_pointer: STACK_RESET,
             bus: Bus::new(),
         }
     }
@@ -168,7 +171,10 @@ impl CPU {
     fn branch(&mut self, condition: bool) {
         if condition {
             let jump: i8 = self.mem_read(self.program_counter) as i8;
-            let jump_addr = self.program_counter.wrapping_add(1).wrapping_add(jump as u16);
+            let jump_addr = self
+                .program_counter
+                .wrapping_add(1)
+                .wrapping_add(jump as u16);
 
             self.program_counter = jump_addr;
         }
