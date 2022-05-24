@@ -331,8 +331,10 @@ impl CPU {
                     self.and(&opcode.mode);
                 }
 
+                0x0A => self.asl_accumulator(),
+
                 /* ASL */
-                0x0A | 0x06 | 0x16 | 0x0E | 0x1E => {
+                0x06 | 0x16 | 0x0E | 0x1E => {
                     self.asl(&opcode.mode);
                 }
 
@@ -559,6 +561,17 @@ impl CPU {
         let addr = self.get_operand_address(mode);
         let value = self.mem_read(addr);
         self.set_register_a(value & self.register_a);
+    }
+
+    fn asl_accumulator(&mut self) {
+        let mut data = self.register_a;
+        if data >> 7 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        data = data << 1;
+        self.set_register_a(data)
     }
 
     fn asl(&mut self, mode: &AddressingMode) -> u8 {
