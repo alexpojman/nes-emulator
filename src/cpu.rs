@@ -1,5 +1,5 @@
 use crate::{
-    bus::{Bus, Mem},
+    bus::{Bus},
     opcodes,
 };
 use std::collections::HashMap;
@@ -42,6 +42,25 @@ pub struct CPU {
     bus: Bus,
 }
 
+pub trait Mem {
+    fn mem_read(&self, addr: u16) -> u8;
+
+    fn mem_write(&mut self, addr: u16, data: u8);
+
+    fn mem_read_u16(&self, pos: u16) -> u16 {
+        let lo = self.mem_read(pos) as u16;
+        let hi = self.mem_read(pos + 1) as u16;
+        (hi << 8) | lo
+    }
+
+    fn mem_write_u16(&mut self, pos: u16, data: u16) {
+        let lo = (data & 0xff) as u8;
+        let hi = (data >> 8) as u8;
+        self.mem_write(pos, lo);
+        self.mem_write(pos + 1, hi);
+    }
+}
+
 impl Mem for CPU {
     fn mem_read(&self, addr: u16) -> u8 {
         self.bus.mem_read(addr)
@@ -75,7 +94,7 @@ pub enum AddressingMode {
 }
 
 impl CPU {
-    pub fn new() -> Self {
+    pub fn new(bus: Bus) -> Self {
         CPU {
             register_a: 0,
             register_x: 0,
@@ -83,7 +102,59 @@ impl CPU {
             status: CpuFlags::from_bits_truncate(0b100100),
             program_counter: 0,
             stack_pointer: STACK_RESET,
-            bus: Bus::new(),
+            bus: bus,
+        }
+    }
+
+    pub fn get_absolute_address(&self, mode: &AddressingMode, addr: u16) -> u16 {
+        match mode {
+            AddressingMode::ZeroPage => self.mem_read(addr) as u16,
+
+            AddressingMode::Absolute => self.mem_read_u16(addr),
+
+            AddressingMode::ZeroPage_X => {
+                let pos = self.mem_read(addr);
+                let addr = pos.wrapping_add(self.register_x) as u16;
+                addr
+            }
+            AddressingMode::ZeroPage_Y => {
+                let pos = self.mem_read(addr);
+                let addr = pos.wrapping_add(self.register_y) as u16;
+                addr
+            }
+
+            AddressingMode::Absolute_X => {
+                let base = self.mem_read_u16(addr);
+                let addr = base.wrapping_add(self.register_x as u16);
+                addr
+            }
+            AddressingMode::Absolute_Y => {
+                let base = self.mem_read_u16(addr);
+                let addr = base.wrapping_add(self.register_y as u16);
+                addr
+            }
+
+            AddressingMode::Indirect_X => {
+                let base = self.mem_read(addr);
+
+                let ptr: u8 = (base as u8).wrapping_add(self.register_x);
+                let lo = self.mem_read(ptr as u16);
+                let hi = self.mem_read(ptr.wrapping_add(1) as u16);
+                (hi as u16) << 8 | (lo as u16)
+            }
+            AddressingMode::Indirect_Y => {
+                let base = self.mem_read(addr);
+
+                let lo = self.mem_read(base as u16);
+                let hi = self.mem_read((base as u8).wrapping_add(1) as u16);
+                let deref_base = (hi as u16) << 8 | (lo as u16);
+                let deref = deref_base.wrapping_add(self.register_y as u16);
+                deref
+            }
+
+            _ => {
+                panic!("mode {:?} is not supported", mode);
+            }
         }
     }
 
@@ -901,10 +972,12 @@ impl CPU {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::cartridge::test;
 
     #[test]
     fn test_0xa9_lda_immidiate_load_data() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.load_and_run(vec![0xa9, 0x05, 0x00]);
 
         assert_eq!(cpu.register_a, 0x05);
@@ -914,7 +987,8 @@ mod test {
 
     #[test]
     fn test_0xa9_lda_zero_flag() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.load_and_run(vec![0xa9, 0x00, 0x00]);
 
         assert!(cpu.status.bits() & 0b0000_0010 == 0b10);
@@ -922,7 +996,8 @@ mod test {
 
     #[test]
     fn test_0xaa_tax_move_a_to_x() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.load_and_run(vec![0xa9, 0x0a, 0xaa, 0x00]);
 
         assert_eq!(cpu.register_x, 10);
@@ -930,7 +1005,8 @@ mod test {
 
     #[test]
     fn test_5_ops_working_together() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.load_and_run(vec![0xa9, 0xc0, 0xaa, 0xe8, 0x00]);
 
         assert_eq!(cpu.register_x, 0xc1)
@@ -938,7 +1014,8 @@ mod test {
 
     #[test]
     fn test_inx_overflow() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.load_and_run(vec![0xa9, 0xff, 0xaa, 0xe8, 0xe8, 0x00]);
 
         assert_eq!(cpu.register_x, 1)
@@ -946,7 +1023,8 @@ mod test {
 
     #[test]
     fn test_lda_from_memory() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.mem_write(0x10, 0x55);
 
         cpu.load_and_run(vec![0xa5, 0x10, 0x00]);
@@ -956,7 +1034,8 @@ mod test {
 
     #[test]
     fn test_nop() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.mem_write(0x10, 0x55);
 
         cpu.load_and_run(vec![0xEA, 0x00]);
@@ -966,7 +1045,8 @@ mod test {
 
     #[test]
     fn test_tye() {
-        let mut cpu = CPU::new();
+        let bus = Bus::new(test::test_rom());
+        let mut cpu = CPU::new(bus);
         cpu.mem_write(0x10, 0x55);
         cpu.load_and_run(vec![0xa5, 0x10, 0x98, 0x00]);
 
