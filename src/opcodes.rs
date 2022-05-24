@@ -154,6 +154,14 @@ lazy_static! {
         // JSR - Jump to New Location Saving Return Address
         OpCode::new(0x20, "JSR", 3, 6, AddressingMode::NoneAddressing),
 
+        // *LAX - Shortcut for LDA value then TAX
+        OpCode::new(0xA7, "*LAX", 2, 3, AddressingMode::ZeroPage),
+        OpCode::new(0xB7, "*LAX", 2, 4, AddressingMode::ZeroPage_Y),
+        OpCode::new(0xAF, "*LAX", 3, 4, AddressingMode::Absolute),
+        OpCode::new(0xBF, "*LAX", 3, 4, AddressingMode::Absolute_Y),
+        OpCode::new(0xA3, "*LAX", 2, 6, AddressingMode::Indirect_X),
+        OpCode::new(0xB3, "*LAX", 2, 5, AddressingMode::Indirect_Y),
+
         // LDA - Load Accumulator with Memory
         OpCode::new(0xA9, "LDA", 2, 2, AddressingMode::Immediate),
         OpCode::new(0xA5, "LDA", 2, 3, AddressingMode::ZeroPage),
@@ -186,7 +194,38 @@ lazy_static! {
         OpCode::new(0x5E, "LSR", 3, 7, AddressingMode::Absolute_X),
 
         // NOP - No Operation
+        OpCode::new(0x1A, "NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x3A, "NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x5A, "NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x7A, "NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0xDA, "NOP", 1, 2, AddressingMode::NoneAddressing),
         OpCode::new(0xEA, "NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0xFA, "NOP", 1, 2, AddressingMode::NoneAddressing),
+
+        // *NOP (Unofficial NOP)
+        OpCode::new(0x04, "*NOP", 2, 3, AddressingMode::ZeroPage),
+        OpCode::new(0x44, "*NOP", 2, 3, AddressingMode::ZeroPage),
+        OpCode::new(0x64, "*NOP", 2, 3, AddressingMode::ZeroPage),
+        OpCode::new(0x0C, "*NOP", 3, 4, AddressingMode::Absolute),
+        OpCode::new(0x1C, "*NOP", 3, 4 /* or 5*/, AddressingMode::Absolute_X),
+        OpCode::new(0x3C, "*NOP", 3, 4 /* or 5*/, AddressingMode::Absolute_X),
+        OpCode::new(0x5C, "*NOP", 3, 4 /* or 5*/, AddressingMode::Absolute_X),
+        OpCode::new(0x7C, "*NOP", 3, 4 /* or 5*/, AddressingMode::Absolute_X),
+        OpCode::new(0xDC, "*NOP", 3, 4 /* or 5*/, AddressingMode::Absolute_X),
+        OpCode::new(0xFC, "*NOP", 3, 4 /* or 5*/, AddressingMode::Absolute_X),
+        OpCode::new(0x14, "*NOP", 2, 4, AddressingMode::ZeroPage_X),
+        OpCode::new(0x34, "*NOP", 2, 4, AddressingMode::ZeroPage_X),
+        OpCode::new(0x54, "*NOP", 2, 4, AddressingMode::ZeroPage_X),
+        OpCode::new(0x74, "*NOP", 2, 4, AddressingMode::ZeroPage_X),
+        OpCode::new(0xD4, "*NOP", 2, 4, AddressingMode::ZeroPage_X),
+        OpCode::new(0xF4, "*NOP", 2, 4, AddressingMode::ZeroPage_X),
+
+        // *NOP (SKB)
+        OpCode::new(0x80, "*NOP", 2, 2, AddressingMode::Immediate),
+        OpCode::new(0x82, "*NOP", 2, 2, AddressingMode::Immediate),
+        OpCode::new(0x89, "*NOP", 2, 2, AddressingMode::Immediate),
+        OpCode::new(0xC2, "*NOP", 2, 2, AddressingMode::Immediate),
+        OpCode::new(0xE2, "*NOP", 2, 2, AddressingMode::Immediate),
 
         // ORA - OR Memory with Accumulator
         OpCode::new(0x09, "ORA", 2, 2, AddressingMode::Immediate),

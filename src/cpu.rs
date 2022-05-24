@@ -433,6 +433,14 @@ impl CPU {
                 /* JSR */
                 0x20 => self.jsr(),
 
+                /* *LAX */
+                0xA7 | 0xB7 | 0xAF | 0xBF | 0xA3 | 0xB3 => {
+                    // Shortcut for LDA value then TAX
+                    self.lda(&opcode.mode);
+                    self.tax(); // This might potentially not need the set carry 
+
+                }
+
                 /* LDA */
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => {
                     self.lda(&opcode.mode);
@@ -455,8 +463,22 @@ impl CPU {
                 }
 
                 /* NOP */
-                0xEA => {
+                0x1A | 0x3A | 0x5A | 0x7A | 0xDA | 0xEA | 0xFA => {
                     // do nothing
+                }
+
+                /* *NOP Read */
+                0x04 | 0x44 | 0x64 | 0x0C | 0x1C | 0x3C | 
+                0x5C | 0x7C | 0xDC | 0xFC | 0x14 | 0x34 | 
+                0x54 | 0x74 | 0xD4 | 0xF4    => {
+                    let addr = self.get_operand_address(&opcode.mode);
+                    let data = self.mem_read(addr);
+                    // Do nothing else
+                }
+
+                /* *NOP SKB */
+                0x80 | 0x82 | 0x89 | 0xC2 | 0xE2 => {
+                    /* 2 byte NOP (immidiate ), skip */
                 }
 
                 /* ORA */
