@@ -113,6 +113,15 @@ lazy_static! {
         OpCode::new(0xC4, "CPY", 2, 3, AddressingMode::ZeroPage),
         OpCode::new(0xCC, "CPY", 3, 4, AddressingMode::Absolute),
 
+        // *DCP - Equivalent to DEC value then CMP value, except supporting more addressing modes.
+        OpCode::new(0xC3, "*DCP", 2, 8, AddressingMode::Indirect_X),
+        OpCode::new(0xC7, "*DCP", 2, 5, AddressingMode::ZeroPage),
+        OpCode::new(0xCF, "*DCP", 3, 6, AddressingMode::Absolute),
+        OpCode::new(0xD3, "*DCP", 2, 8, AddressingMode::Indirect_Y),
+        OpCode::new(0xD7, "*DCP", 2, 6, AddressingMode::ZeroPage_X),
+        OpCode::new(0xDB, "*DCP", 3, 7, AddressingMode::Absolute_Y),
+        OpCode::new(0xDF, "*DCP", 3, 7, AddressingMode::Absolute_X),
+
         // DEC - Decrement Memory by One
         OpCode::new(0xC6, "DEC", 2, 5, AddressingMode::ZeroPage),
         OpCode::new(0xD6, "DEC", 2, 6, AddressingMode::ZeroPage_X),
@@ -269,6 +278,12 @@ lazy_static! {
         // RTS - Return from Subroutine
         OpCode::new(0x60, "RTS", 1, 6, AddressingMode::NoneAddressing),
 
+        // *SAX - Stores the bitwise AND of A and X. As with STA and STX, no flags are affected.
+        OpCode::new(0x83, "*SAX", 2, 6, AddressingMode::Indirect_X),
+        OpCode::new(0x87, "*SAX", 2, 3, AddressingMode::ZeroPage),
+        OpCode::new(0x8F, "*SAX", 3, 4, AddressingMode::Absolute),
+        OpCode::new(0x97, "*SAX", 2, 4, AddressingMode::ZeroPage_Y),
+
         // SBC - Subtract Memory from Accumulator with Borrow
         OpCode::new(0xE9, "SBC", 2, 2, AddressingMode::Immediate),
         OpCode::new(0xE5, "SBC", 2, 3, AddressingMode::ZeroPage),
@@ -278,6 +293,9 @@ lazy_static! {
         OpCode::new(0xF9, "SBC", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_Y),
         OpCode::new(0xE1, "SBC", 2, 6, AddressingMode::Indirect_X),
         OpCode::new(0xF1, "SBC", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y),
+
+        // *SBC - Unofficial Subtract Memory from Accumulator with Borrow
+        OpCode::new(0xEB, "*SBC", 2, 2, AddressingMode::Immediate),
 
         // SEC - Set Carry Flag
         OpCode::new(0x38, "SEC", 1, 2, AddressingMode::NoneAddressing),

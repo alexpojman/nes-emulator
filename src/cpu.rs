@@ -397,6 +397,11 @@ impl CPU {
                     self.compare(&opcode.mode, self.register_y);
                 }
 
+                /* *DCP */
+                0xC7 | 0xD7 | 0xCF | 0xDF | 0xDB | 0xD3 | 0xC3 => {
+                    self.dcp(&opcode.mode);
+                }
+
                 /* DEC */
                 0xC6 | 0xD6 | 0xCE | 0xDE => {
                     self.dec(&opcode.mode);
@@ -516,8 +521,13 @@ impl CPU {
                 /* RTS */
                 0x60 => self.rts(),
 
+                /* *SAX */
+                0x83 | 0x87 | 0x8F | 0x97 => {
+                    self.sax(&opcode.mode);
+                }
+
                 /* SBC */
-                0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 => {
+                0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 | 0xEB => {
                     self.sbc(&opcode.mode);
                 }
 
@@ -666,6 +676,19 @@ impl CPU {
 
     fn clv(&mut self) {
         self.status.remove(CpuFlags::OVERFLOW);
+    }
+
+    fn dcp(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let mut data = self.mem_read(addr);
+        data = data.wrapping_sub(1);
+        self.mem_write(addr, data);
+        // self._update_zero_and_negative_flags(data);
+        if data <= self.register_a {
+            self.status.insert(CpuFlags::CARRY);
+        }
+
+        self.update_zero_and_negative_flags(self.register_a.wrapping_sub(data));
     }
 
     fn dec(&mut self, mode: &AddressingMode) -> u8 {
@@ -898,6 +921,12 @@ impl CPU {
 
     fn rts(&mut self) {
         self.program_counter = self.stack_pop_u16() + 1;
+    }
+
+    fn sax(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let data = self.register_a & self.register_x;
+        self.mem_write(addr, data);
     }
 
     fn sbc(&mut self, mode: &AddressingMode) {
