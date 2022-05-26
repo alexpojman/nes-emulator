@@ -193,6 +193,14 @@ impl CPU {
         self.set_register_a(result);
     }
 
+    fn sub_from_register_a(&mut self, data: u8) {
+        self.add_to_register_a(((data as i8).wrapping_neg().wrapping_sub(1)) as u8);
+    }
+
+    fn or_with_register_a(&mut self, data: u8) {
+        self.set_register_a(data | self.register_a);
+    }
+
     fn stack_pop(&mut self) -> u8 {
         self.stack_pointer = self.stack_pointer.wrapping_add(1);
         self.mem_read((STACK as u16) + self.stack_pointer as u16)
@@ -429,6 +437,12 @@ impl CPU {
                 /* INY */
                 0xC8 => self.iny(),
 
+                /* *ISB */
+                0xE7 | 0xF7 | 0xEF | 0xFF | 0xFB | 0xE3 | 0xF3 => {
+                    let data = self.inc(&opcode.mode);
+                    self.sub_from_register_a(data);
+                }
+
                 /* JMP Absolute */
                 0x4C => self.jmp_absolute(),
 
@@ -539,6 +553,12 @@ impl CPU {
 
                 /* SEI */
                 0x78 => self.sei(),
+
+                /* SLO */
+                0x07 | 0x17 | 0x0F | 0x1f | 0x1b | 0x03 | 0x13 => {
+                    let data = self.asl(&opcode.mode);
+                    self.or_with_register_a(data);
+                }
 
                 /* STA */
                 0x85 | 0x95 | 0x8D | 0x9D | 0x99 | 0x81 | 0x91 => {

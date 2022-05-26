@@ -156,6 +156,15 @@ lazy_static! {
         // INY - Increment Index Y by One
         OpCode::new(0xC8, "INY", 1, 2, AddressingMode::NoneAddressing),
 
+        // *ISB - Increase memory by one, then subtract memory from accu-mulator
+        OpCode::new(0xE7, "*ISB", 2,5, AddressingMode::ZeroPage),
+        OpCode::new(0xF7, "*ISB", 2,6, AddressingMode::ZeroPage_X),
+        OpCode::new(0xEF, "*ISB", 3,6, AddressingMode::Absolute),
+        OpCode::new(0xFF, "*ISB", 3,7, AddressingMode::Absolute_X),
+        OpCode::new(0xFB, "*ISB", 3,7, AddressingMode::Absolute_Y),
+        OpCode::new(0xE3, "*ISB", 2,8, AddressingMode::Indirect_X),
+        OpCode::new(0xF3, "*ISB", 2,8, AddressingMode::Indirect_Y),
+
         // JMP - Jump to New Location
         OpCode::new(0x4C, "JMP", 3, 3, AddressingMode::NoneAddressing), //AddressingMode that acts as Immidiate
         OpCode::new(0x6C, "JMP", 3, 5, AddressingMode::NoneAddressing), //AddressingMode:Indirect with 6502 bug
@@ -305,6 +314,15 @@ lazy_static! {
 
         // SEI - Set Interrupt Disable Status
         OpCode::new(0x78, "SEI", 1, 2, AddressingMode::NoneAddressing),
+
+        // *SLO - Shift left one bit in memory, then OR accumulator with memory
+        OpCode::new(0x07, "*SLO", 2, 5, AddressingMode::ZeroPage),
+        OpCode::new(0x17, "*SLO", 2, 6, AddressingMode::ZeroPage_X),
+        OpCode::new(0x0F, "*SLO", 3, 6, AddressingMode::Absolute),
+        OpCode::new(0x1F, "*SLO", 3, 7, AddressingMode::Absolute_X),
+        OpCode::new(0x1B, "*SLO", 3, 7, AddressingMode::Absolute_Y),
+        OpCode::new(0x03, "*SLO", 2, 8, AddressingMode::Indirect_X),
+        OpCode::new(0x13, "*SLO", 2, 8, AddressingMode::Indirect_Y),
 
         // STA - Store Accumulator in Memory
         OpCode::new(0x85, "STA", 2, 3, AddressingMode::ZeroPage),
