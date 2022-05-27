@@ -50,6 +50,18 @@ lazy_static! {
         OpCode::new(0x0E, "ASL", 3, 6, AddressingMode::Absolute),
         OpCode::new(0x1E, "ASL", 3, 7, AddressingMode::Absolute_X),
 
+        // *AXS - AND X register with accumulator and store result in X regis-ter, then subtract byte from X register (without borrow).
+        OpCode::new(0xCB, "*AXS", 2,2, AddressingMode::Immediate),
+
+        // *ARR
+        OpCode::new(0x6B, "*ARR", 2,2, AddressingMode::Immediate),
+
+
+        OpCode::new(0x0B, "*ANC", 2,2, AddressingMode::Immediate),
+        OpCode::new(0x2B, "*ANC", 2,2, AddressingMode::Immediate),
+
+        OpCode::new(0x4B, "*ALR", 2,2, AddressingMode::Immediate),
+
         // BCC - Branch on Carry Clear
         OpCode::new(0x90, "BCC", 2, 2 /*(+1 if branch succeeds +2 if to a new page)*/, AddressingMode::NoneAddressing),
 
@@ -212,13 +224,13 @@ lazy_static! {
         OpCode::new(0x5E, "LSR", 3, 7, AddressingMode::Absolute_X),
 
         // NOP - No Operation
-        OpCode::new(0x1A, "NOP", 1, 2, AddressingMode::NoneAddressing),
-        OpCode::new(0x3A, "NOP", 1, 2, AddressingMode::NoneAddressing),
-        OpCode::new(0x5A, "NOP", 1, 2, AddressingMode::NoneAddressing),
-        OpCode::new(0x7A, "NOP", 1, 2, AddressingMode::NoneAddressing),
-        OpCode::new(0xDA, "NOP", 1, 2, AddressingMode::NoneAddressing),
-        OpCode::new(0xEA, "NOP", 1, 2, AddressingMode::NoneAddressing),
-        OpCode::new(0xFA, "NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x1A, "*NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x3A, "*NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x5A, "*NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0x7A, "*NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0xDA, "*NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0xEA, "*NOP", 1, 2, AddressingMode::NoneAddressing),
+        OpCode::new(0xFA, "*NOP", 1, 2, AddressingMode::NoneAddressing),
 
         // *NOP (Unofficial NOP)
         OpCode::new(0x04, "*NOP", 2, 3, AddressingMode::ZeroPage),
@@ -245,6 +257,20 @@ lazy_static! {
         OpCode::new(0xC2, "*NOP", 2, 2, AddressingMode::Immediate),
         OpCode::new(0xE2, "*NOP", 2, 2, AddressingMode::Immediate),
 
+        // *NOP - Stop program counter (processor lock up).
+        OpCode::new(0x02, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x12, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x22, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x32, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x42, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x52, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x62, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x72, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0x92, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0xb2, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0xd2, "*NOP", 1,2, AddressingMode::NoneAddressing),
+        OpCode::new(0xf2, "*NOP", 1,2, AddressingMode::NoneAddressing),
+
         // ORA - OR Memory with Accumulator
         OpCode::new(0x09, "ORA", 2, 2, AddressingMode::Immediate),
         OpCode::new(0x05, "ORA", 2, 3, AddressingMode::ZeroPage),
@@ -266,6 +292,24 @@ lazy_static! {
 
         // PLP - Pull Processor Status from Stack
         OpCode::new(0x28, "PLP", 1, 4, AddressingMode::NoneAddressing),
+
+        // *RRA - Equivalent to ROR value then ADC value
+        OpCode::new(0x67, "*RRA", 2, 5, AddressingMode::ZeroPage),
+        OpCode::new(0x77, "*RRA", 2, 6, AddressingMode::ZeroPage_X),
+        OpCode::new(0x6F, "*RRA", 3, 6, AddressingMode::Absolute),
+        OpCode::new(0x7F, "*RRA", 3, 7, AddressingMode::Absolute_X),
+        OpCode::new(0x7B, "*RRA", 3, 7, AddressingMode::Absolute_Y),
+        OpCode::new(0x63, "*RRA", 2, 8, AddressingMode::Indirect_X),
+        OpCode::new(0x73, "*RRA", 2, 8, AddressingMode::Indirect_Y),
+
+        // *RLA - Equivalent to ROL value then AND value, except supporting more addressing modes
+        OpCode::new(0x27, "*RLA", 2, 5, AddressingMode::ZeroPage),
+        OpCode::new(0x37, "*RLA", 2, 6, AddressingMode::ZeroPage_X),
+        OpCode::new(0x2F, "*RLA", 3, 6, AddressingMode::Absolute),
+        OpCode::new(0x3F, "*RLA", 3, 7, AddressingMode::Absolute_X),
+        OpCode::new(0x3B, "*RLA", 3, 7, AddressingMode::Absolute_Y),
+        OpCode::new(0x23, "*RLA", 2, 8, AddressingMode::Indirect_X),
+        OpCode::new(0x33, "*RLA", 2, 8, AddressingMode::Indirect_Y),
 
         // ROL - Rotate One Bit Left (Memory or Accumulator)
         OpCode::new(0x2A, "ROL", 1, 2, AddressingMode::NoneAddressing),
@@ -324,6 +368,15 @@ lazy_static! {
         OpCode::new(0x03, "*SLO", 2, 8, AddressingMode::Indirect_X),
         OpCode::new(0x13, "*SLO", 2, 8, AddressingMode::Indirect_Y),
 
+        // *SRE - Equivalent to LSR value then EOR value
+        OpCode::new(0x47, "*SRE", 2, 5, AddressingMode::ZeroPage),
+        OpCode::new(0x57, "*SRE", 2, 6, AddressingMode::ZeroPage_X),
+        OpCode::new(0x4F, "*SRE", 3, 6, AddressingMode::Absolute),
+        OpCode::new(0x5F, "*SRE", 3, 7, AddressingMode::Absolute_X),
+        OpCode::new(0x5B, "*SRE", 3, 7, AddressingMode::Absolute_Y),
+        OpCode::new(0x43, "*SRE", 2, 8, AddressingMode::Indirect_X),
+        OpCode::new(0x53, "*SRE", 2, 8, AddressingMode::Indirect_Y),
+
         // STA - Store Accumulator in Memory
         OpCode::new(0x85, "STA", 2, 3, AddressingMode::ZeroPage),
         OpCode::new(0x95, "STA", 2, 4, AddressingMode::ZeroPage_X),
@@ -360,6 +413,17 @@ lazy_static! {
 
         // TYA - Transfer Index Y to Accumulator
         OpCode::new(0x98, "TYA", 1, 2, AddressingMode::NoneAddressing),
+
+        // Unstable codes
+        OpCode::new(0xAB, "*LXA", 2, 3, AddressingMode::Immediate), //todo: highly unstable and not used
+        //http://visual6502.org/wiki/index.php?title=6502_Opcode_8B_%28XAA,_ANE%29
+        OpCode::new(0x8B, "*XAA", 2, 3, AddressingMode::Immediate), //todo: highly unstable and not used
+        OpCode::new(0xBB, "*LAS", 3, 2, AddressingMode::Absolute_Y), //todo: highly unstable and not used
+        OpCode::new(0x9B, "*TAS", 3, 2, AddressingMode::Absolute_Y), //todo: highly unstable and not used
+        OpCode::new(0x93, "*AHX", 2, /* guess */ 8, AddressingMode::Indirect_Y), //todo: highly unstable and not used
+        OpCode::new(0x9F, "*AHX", 3, /* guess */ 4/* or 5*/, AddressingMode::Absolute_Y), //todo: highly unstable and not used
+        OpCode::new(0x9E, "*SHX", 3, /* guess */ 4/* or 5*/, AddressingMode::Absolute_Y), //todo: highly unstable and not used
+        OpCode::new(0x9C, "*SHY", 3, /* guess */ 4/* or 5*/, AddressingMode::Absolute_X), //todo: highly unstable and not used
     ];
 
     pub static ref OPCODES_MAP: HashMap<u8, &'static OpCode> = {
