@@ -1,0 +1,14 @@
+name: "Release"
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release: 
+    name: "Release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - shell: bash
+        run: |
+          echo "${{ github.sha }} - ${{ github.release.tag_name }}""
