@@ -11,4 +11,4 @@ jobs:
     steps:
       - shell: bash
         run: |
-          echo "${{ github.sha }} - ${{ github.release.tag_name }}""
+          echo "${{ github.sha }} - ${{ github.event.release.tag_name }}"
